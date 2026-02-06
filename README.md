@@ -121,8 +121,10 @@ Get a free API key at [weatherapi.com](https://www.weatherapi.com/).
 The browser extension features a unique dynamic icon that shows:
 - **Temperature** with degree symbol (e.g., `23°`, `-11°`)
 - **Condition Letter**:
-  - S = Sunny / Clear (both day and night)
-  - C = Cloudy / Overcast / Partly Cloudy
+  - S = Sunny (daytime only)
+  - C = Clear (nighttime)
+  - P = Partly Cloudy
+  - O = Overcast / Cloudy
   - R = Rain / Drizzle
   - N = Snow / Blizzard
   - T = Thunderstorm
@@ -132,7 +134,9 @@ The browser extension features a unique dynamic icon that shows:
 
 The icon uses high-contrast colors with outlined text for maximum readability at small sizes.
 
-Example: `23°S` means 23°C and Sunny/Clear
+Examples: 
+- `23°S` = 23°C and Sunny (daytime)
+- `-11°C` = -11°C and Clear (nighttime)
 
 Icons update automatically every 3 hours or when you manually refresh.
 

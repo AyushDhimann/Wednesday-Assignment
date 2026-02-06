@@ -6,13 +6,13 @@ const ALARM_NAME = 'weatherUpdate';
 
 // Weather condition codes to letter mapping
 const CONDITION_MAP = {
-  // Clear/Sunny (day and night)
-  1000: 'S', // Sunny (day) / Clear (night)
+  // Sunny (day only) - Clear at night uses different letter
+  1000: 'S', // Sunny (day) - handled specially for night
   // Partly cloudy
-  1003: 'C', // Partly cloudy
+  1003: 'P', // Partly cloudy (changed from C)
   // Cloudy
-  1006: 'C', // Cloudy
-  1009: 'C', // Overcast
+  1006: 'O', // Cloudy (O for Overcast)
+  1009: 'O', // Overcast
   // Mist/Fog
   1030: 'F', // Mist
   1135: 'F', // Fog
@@ -65,9 +65,13 @@ const CONDITION_MAP = {
   1282: 'T', // Moderate or heavy snow with thunder
 };
 
-// Get condition letter from code
-function getConditionLetter(code) {
-  return CONDITION_MAP[code] || 'C'; // Default to Cloudy
+// Get condition letter from code and is_day
+function getConditionLetter(code, isDay = 1) {
+  // Special handling for code 1000 (Sunny/Clear)
+  if (code === 1000) {
+    return isDay === 1 ? 'S' : 'C'; // S for Sunny (day), C for Clear (night)
+  }
+  return CONDITION_MAP[code] || 'O'; // Default to Overcast
 }
 
 // Fetch weather data from API
@@ -90,12 +94,14 @@ function generateIconData(temp, conditionLetter, size) {
   
   // Background colors based on condition - higher contrast
   const bgColors = {
-    'S': '#FF8C00', // Sunny/Clear - dark orange
-    'C': '#546E7A', // Cloudy - dark blue-grey
+    'S': '#FF8C00', // Sunny - dark orange
+    'C': '#1A237E', // Clear (night) - dark indigo
+    'P': '#607D8B', // Partly cloudy - blue grey
+    'O': '#546E7A', // Overcast/Cloudy - dark blue-grey
     'R': '#1565C0', // Rain - dark blue
-    'N': '#607D8B', // Snow - blue grey
+    'N': '#78909C', // Snow - blue grey
     'T': '#4527A0', // Thunder - deep purple
-    'F': '#78909C', // Fog - grey
+    'F': '#455A64', // Fog - dark grey
     'L': '#0097A7', // Sleet - dark cyan
     'I': '#00838F', // Ice - dark teal
   };
@@ -147,8 +153,8 @@ function generateIconData(temp, conditionLetter, size) {
 }
 
 // Update the extension icon
-async function updateIcon(temp, conditionCode) {
-  const conditionLetter = getConditionLetter(conditionCode);
+async function updateIcon(temp, conditionCode, isDay = 1) {
+  const conditionLetter = getConditionLetter(conditionCode, isDay);
   
   try {
     // Generate icons for different sizes
@@ -168,7 +174,7 @@ async function updateIcon(temp, conditionCode) {
     
     // Update tooltip
     await chrome.action.setTitle({
-      title: `${Math.round(temp)}°C - ${getConditionText(conditionCode)}`
+      title: `${Math.round(temp)}°C - ${getConditionText(conditionCode, isDay)}`
     });
   } catch (error) {
     console.error('Error updating icon:', error);
@@ -176,10 +182,12 @@ async function updateIcon(temp, conditionCode) {
 }
 
 // Get human-readable condition text
-function getConditionText(code) {
+function getConditionText(code, isDay = 1) {
   const texts = {
     'S': 'Sunny',
-    'C': 'Cloudy',
+    'C': 'Clear',
+    'P': 'Partly Cloudy',
+    'O': 'Cloudy',
     'R': 'Rainy',
     'N': 'Snowy',
     'T': 'Thunder',
@@ -187,7 +195,7 @@ function getConditionText(code) {
     'L': 'Sleet',
     'I': 'Icy',
   };
-  const letter = getConditionLetter(code);
+  const letter = getConditionLetter(code, isDay);
   return texts[letter] || 'Unknown';
 }
 
@@ -210,8 +218,8 @@ async function updateWeather() {
       lastUpdate: Date.now()
     });
     
-    // Update icon
-    await updateIcon(data.current.temp_c, data.current.condition.code);
+    // Update icon with is_day info
+    await updateIcon(data.current.temp_c, data.current.condition.code, data.current.is_day);
     
     console.log('Weather updated successfully');
   } catch (error) {
