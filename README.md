@@ -4,6 +4,22 @@
 
 A modern weather application featuring a standalone Next.js web app and a Chrome browser extension with dynamic icons.
 
+## Demo
+
+#### Website Demo
+
+![Website Demo](assets/Website%20Demo.gif)
+
+#### Extension Demo
+
+![Extension Demo](assets/Extension%20Demo.gif)
+
+#### Extension Dynamic Icons
+
+![Extension Icon Example 1](assets/Extension-1.png)
+
+![Extension Icon Example 2](assets/Extension-2.png)
+
 ## Features
 
 ### Web App (Next.js)
